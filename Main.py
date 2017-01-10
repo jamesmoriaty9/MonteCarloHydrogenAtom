@@ -3,18 +3,45 @@ __author__ = 'Till'
 import math
 import Metropolis_Algorithm
 import numpy
+import pylab as plt
 
 
-"""here you can see that the implementation of other pythonscripts within the main script works perfectly :)"""
-#print Metropolis_Algorithm.metropolisalgorithm(1000000, 1), Metropolis_Algorithm.probability(1000000, 1)
-
-def energystate(radius):
+def wavefunctionsquare(radius, alpha):
     """
-    :param radius: the radius where the energystate will be calculated
-    :return: the energystate of the atom
+    :param alpha: a variable for my Ansatz
+    :param radius: The position of the electron is defined by the radius
+    :return:
     """
-    return -0.5*math.log(radius)
+    return numpy.exp(-alpha*radius)*numpy.conjugate((numpy.exp(-alpha*radius)))
 
+
+def integral(function, alpha, xmin=0, xmax=1, ymin=0, ymax=1, steps=1000):
+    liste = [[(xmax-xmin)*x+xmin, (ymax-ymin)*y+ymin] for x, y in numpy.random.rand(steps, 2)]
+    hit = 0
+    for x, y in liste:
+        if y < function(x, alpha):
+            hit += 1.
+    return (xmax-xmin)*(ymax-ymin)*hit/steps
+
+
+def desity(radius, alpha):
+    return wavefunctionsquare(alpha, radius)/(integral(wavefunctionsquare, alpha, 0, 5, 0, 1))
+
+
+def intermediate(radius, alpha):
+    return desity(radius, alpha)*((-alpha**2/2)+(alpha/radius)-(1/radius))
+
+
+def energystate(alpha):
+    return integral(intermediate, alpha, 0.1, 3, -3, 3)
+
+
+#print energystate(7)
+x = [i for i in numpy.arange(0,2,0.05)]
+y = [energystate(i) for i in x]
+print y
+plt.plot(x,y)
+plt.show()
 
 def montecarlo(temperature, steps):
     """
@@ -23,11 +50,12 @@ def montecarlo(temperature, steps):
     :return: the groundstate energy of the hydrogen atom and the groundstate radius
     """
     randomwalker = numpy.random.randn(steps)
-    radius = 2
+    alpha = 2
     for delr in randomwalker:
-        energydiff = energystate(radius + delr) - energystate(radius)
+        energydiff = energystate(alpha + delr) - energystate(alpha)
         if Metropolis_Algorithm.metropolisalgorithm(temperature, energydiff) == 1:
-            radius += delr
-    return "The groundstate energy is ", energystate(radius), " at the radius of ", radius
+            alpha += delr
+            print alpha
+    return "The groundstate energy is ", energystate(alpha), " at the alpha of ", alpha
 
-print montecarlo(100, 10)
+#print montecarlo(1,1000)

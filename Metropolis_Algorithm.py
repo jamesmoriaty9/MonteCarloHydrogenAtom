@@ -18,7 +18,7 @@ def probability(temperature, energydifference):
     :return: a probability with which the new value will be accepted even if the energy is higher than the previous one
     """
     k = 3.16681*10**(-6)
-    print numpy.exp(-energydifference/(temperature*k)), energydifference
+    #print numpy.exp(-energydifference/(temperature*k)), energydifference
     return numpy.exp(-energydifference/(temperature*k))
 
 
