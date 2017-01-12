@@ -42,3 +42,6 @@ def montecarlo(temperature, bigsteps, smallsteps, alpha=100):
 
 print montecarlo(10, 100, 1000, 40)
 """
+
+
+"""bliblbiblasgjbnkad"""
