@@ -4,58 +4,41 @@ import math
 import Metropolis_Algorithm
 import numpy
 import pylab as plt
+import Energycalculations
 
 
-def wavefunctionsquare(radius, alpha):
-    """
-    :param alpha: a variable for my Ansatz
-    :param radius: The position of the electron is defined by the radius
-    :return:
-    """
-    return numpy.exp(-alpha*radius)*numpy.conjugate((numpy.exp(-alpha*radius)))
 
-
-def integral(function, alpha, xmin=0, xmax=1, ymin=0, ymax=1, steps=1000):
-    liste = [[(xmax-xmin)*x+xmin, (ymax-ymin)*y+ymin] for x, y in numpy.random.rand(steps, 2)]
-    hit = 0
-    for x, y in liste:
-        if y < function(x, alpha):
-            hit += 1.
-    return (xmax-xmin)*(ymax-ymin)*hit/steps
-
-
-def desity(radius, alpha):
-    return wavefunctionsquare(alpha, radius)/(integral(wavefunctionsquare, alpha, 0, 5, 0, 1))
-
-
-def intermediate(radius, alpha):
-    return desity(radius, alpha)*((-alpha**2/2)+(alpha/radius)-(1/radius))
-
-
-def energystate(alpha):
-    return integral(intermediate, alpha, 0.1, 3, -3, 3)
-
-
-#print energystate(7)
-x = [i for i in numpy.arange(0,2,0.05)]
-y = [energystate(i) for i in x]
-print y
-plt.plot(x,y)
+Alpha = [i for i in numpy.arange(0,100,0.5)]
+Energy = []
+for i in Alpha:
+    Energy.append(Energycalculations.energystate(i))
+    print i/200.*100, "% done"
+plt.plot(Alpha, Energy, "o")
 plt.show()
-
-def montecarlo(temperature, steps):
-    """
-    :param temperature: the temperature where the program will run the montecarlo algorithm
-    :param steps: how many steps it will take
-    :return: the groundstate energy of the hydrogen atom and the groundstate radius
-    """
-    randomwalker = numpy.random.randn(steps)
-    alpha = 2
-    for delr in randomwalker:
-        energydiff = energystate(alpha + delr) - energystate(alpha)
+"""
+def montecarlo(temperature, bigsteps, smallsteps, alpha=100):
+    bigrandomwalker = [x*2-1 for x in numpy.random.rand(bigsteps)]
+    smallrandomwalker = [x/50 - 0.01 for x in numpy.random.rand(smallsteps)]
+    enernew = Energycalculations.energystate(alpha)
+    alphalist = []
+    for step, delr in enumerate(bigrandomwalker):
+        enerold = enernew
+        enernew = Energycalculations.energystate(alpha + delr)
+        energydiff = enernew - enerold
         if Metropolis_Algorithm.metropolisalgorithm(temperature, energydiff) == 1:
             alpha += delr
+            alphalist.append(alpha)
+            print alpha, step
+    for step, delr in enumerate(smallrandomwalker):
+        enerold = enernew
+        enernew = Energycalculations.energystate(alpha + delr)
+        energydiff = enernew - enerold
+        if Metropolis_Algorithm.metropolisalgorithm(temperature, energydiff) == 1:
+            alpha += delr
+            alphalist.append(alpha)
             print alpha
-    return "The groundstate energy is ", energystate(alpha), " at the alpha of ", alpha
+    alphamean = sum(alphalist[-50:])/50
+    return "The groundstate energy is ", Energycalculations.energystate(alphamean), " at the alpha of ", alphamean
 
-#print montecarlo(1,1000)
+print montecarlo(10, 100, 1000, 40)
+"""
